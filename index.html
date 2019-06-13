@@ -229,6 +229,150 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://guest1798.github.io/2019/06/12/WebSocket/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Blessleon">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blessleon">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/12/WebSocket/" itemprop="url">WebSocket 是什么？</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-12T20:45:29+08:00">
+                2019-06-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="什么是WebSocket"><a href="#什么是WebSocket" class="headerlink" title="什么是WebSocket ?"></a>什么是WebSocket ?</h2><p>百度百科是这么说的：</p>
+<p>​         WebSocket是HTML5 提供的是一种在单个<a href="https://baike.baidu.com/item/TCP" target="_blank" rel="noopener">TCP</a>连接上进行<a href="https://baike.baidu.com/item/全双工" target="_blank" rel="noopener">全双工</a>通信的协议。WebSocket通信协议于2011年被<a href="https://baike.baidu.com/item/IETF" target="_blank" rel="noopener">IETF</a>定为标准RFC 6455，并由RFC7936补充规范。WebSocket <a href="https://baike.baidu.com/item/API" target="_blank" rel="noopener">API</a>也被<a href="https://baike.baidu.com/item/W3C" target="_blank" rel="noopener">W3C</a>定为标准。</p>
+<p>他的作用是什么？</p>
+<p>​        WebSocket使得客户端和服务器之间的数据交换变得更加简单，允许服务端主动向客户端推送数据。在WebSocket API中，浏览器和服务器只需要完成一次握手，两者之间就直接可以创建持久性的连接，并进行双向数据传输。</p>
+<p>看到这里，哦！所以websocket到底是个什么东西？怎么用？用来干什么？原理是个啥？还是一脸懵。</p>
+<p><img src="/2019/06/12/WebSocket/D:/hexoBlog\source\_posts\WebSocket\1.PNG" alt></p>
+<p>接下来，就来更深入的了解一下websocket.</p>
+<p>​        首先，这玩意为什么会出现，这就要追溯网络协议http的历史了。</p>
+<p>1.http协议有个特点就是它是无状态的，无状态导致协议对于事务处理是没有记忆能力的。这会带来什么问题呢，当客户端发请求给服务器，服务器不会记住你，下一次请求时你还得告诉服务器你是谁，这就有了cookie和session的出现。</p>
+<p>2.然而这还不是最紧要的。在http 1.0 时是限制每次连接只处理一个请求的。服务器处理完客户的请求，并收到客户的应答后，即断开连接。这就难受了，客户端要个鸡蛋得问服务器请求一次，然后要个番茄又要问服务器发请求，准备做饭时一看盐没了又要问服务器要。而且http 1.0现在还在使用，覆盖面还是不可小觑的。</p>
+<p>3.到了HTTP 1.1有了持续连接keep-alive，这样不必为每个web对象创建一个新的连接，一个连接可以传送多个对象，就是把鸡蛋番茄和盐的请求通过一个连接发给服务器，服务器一起返回给客户端。采用这种方式可以节省传输时间。而且Keep-Alive不会永久保持连接，它有一个保持时间限度。</p>
+<p>​        但是这样就万事大吉了吗？不是，这又有啥问题了呢？对于一些非即时应用或者对即时性要求不高的应用来说，这样的协议就够了。可是像网页qq(已死亡)，网页微信，以及一些需要实时通信的应用来说，这就不够了，当然，在websocket面世之前，难道就没有这些应用和功能吗？不是。那是如何做到的呢？</p>
+<p>​        为了实现即时通讯的需求，但是服务器又是个不会主动的钢铁直男，只有客户端发request，服务器才会返回response。多数应用会采用ajax轮询，就是每隔一段时间发送一个ajax请求给服务器。</p>
+<p><img src="/2019/06/12/WebSocket/D:/hexoBlog\source\_posts\WebSocket\ajax.PNG" alt></p>
+<p>​        但是这会造成什么后果呢，从图中看出，ajax轮询是在不断地建立HTTP连接，然后等待服务端处理，ajax轮询 需要服务器有很快的处理速度和资源，ajax轮询也会消耗大量资源，例如带宽，带宽就是进家的门，就那么大，一个人轻轻松松进，两个人马马虎虎进，要是五六个人一起往里挤那不是挤爆了。</p>
+<p>​        还有一个方案是long poll长轮询，长轮询是客户端发送请求给客户端，如果客户端没有要返回的东西就保持等待，不会断开连接，等服务器有东西返回了才会关闭连接。就和打电话一样，打了没有回复就不挂电话，一直等，等到有回复了再挂电话。这样一来就需要有很高的并发，也就是同时接待客户的能力，比喻成家就是多少平的，100平的房子来个10个人还勉勉强强，要是来了100个还待着不走那就…haha</p>
+<p>​        所以说这些方案都是有较大缺陷的。那么这时候就应该说websocket了。</p>
+<p>​        websocket 是怎么干的呢？websocket是在http协议之上的，它通过http协议完成握手。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET /chat HTTP/1.1</span><br><span class="line">Host: server.example.com</span><br><span class="line">Upgrade: websocket</span><br><span class="line">Connection: Upgrade</span><br><span class="line">Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==</span><br><span class="line">Sec-WebSocket-Protocol: chat, superchat</span><br><span class="line">Sec-WebSocket-Version: 13</span><br><span class="line">Origin: http://example.com</span><br></pre></td></tr></table></figure>
+<p>这段请求中有这么一段    Upgrade: websocket<br>                                           Connection: Upgrade</p>
+<p>这就告诉服务器，我客户端和你服务器要建立的是websocket连接，然后服务器给客户端返回接受请求，建立websocket连接。在这过程中会有对Sec-WebSocket-Key的验证，最终以Sec-WebSocket-Protocol这个协议来传递数据，然后就与http无瓜了。</p>
+<p><img src="/2019/06/12/WebSocket/D:/hexoBlog\source\_posts\WebSocket\ajax-websocket.PNG" alt></p>
+<p>​                                                                        <strong>ajax轮询和websocket</strong>    </p>
+<p>在建立websocket联系之后，客户端和服务端就不再是客户端主动请求，服务端被动响应的情况了。这时候服务端就能主动将消息推送给客户端，而且这个联系是有记忆的，服务端知道该把消息推送给哪一个客户端。</p>
+<p>​        至此，websocket就基本完美解决了之前的问题。那么这时候又问了，websocket这么好，干嘛一些应用还是在使用轮询，这就是支持问题， websocket是h5里面的东西，而不支持h5的就无法使用websocket，但是还是得实现即时通讯的功能，这时就只能用轮询来模拟了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://guest1798.github.io/2019/05/30/beautiful-page/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -520,7 +664,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -533,7 +677,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">tags</span>
                 
               </div>
